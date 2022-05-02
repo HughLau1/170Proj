@@ -22,6 +22,7 @@ def solve_naive(instance: Instance) -> Solution:
     )
 
 
+
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive
 }
