@@ -22,6 +22,8 @@ class Instance:
     coverage_radius: int
     penalty_radius: int
     cities: List[Point]
+    cities_list: List[List[int, int]]
+    cities_tuples: List[(int, int)]
 
     @property
     def N(self):
@@ -41,7 +43,6 @@ class Instance:
 
     def valid(self):
         """Determines whether the problem instance is valid.
-
         A problem instance is valid if all cities are in bounds and there
         are no duplicate cities.
         """
@@ -61,7 +62,11 @@ class Instance:
         coverage_radius = _next_int(lines_iter)
         penalty_radius = _next_int(lines_iter)
 
-        cities = [Point.parse(line) for line in lines_iter]
+        cities, cities_list, cities_tuples = [], [], []
+        for line in lines_iter: 
+            cities.append(Point.parse(line))
+            cities_list.append(Point.parse_to_np(line))
+            cities_tuples.append(Point.parse_to_tu(line))
         assert num_cities == len(cities)
 
         instance = Instance(
@@ -69,6 +74,8 @@ class Instance:
             coverage_radius=coverage_radius,
             penalty_radius=penalty_radius,
             cities=cities,
+            cities_list=cities_list,
+            cities_tuples=cities_tuples
         )
         assert instance.valid()
         return instance

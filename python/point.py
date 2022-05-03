@@ -23,12 +23,10 @@ class Point:
 
     def distance_sq(self: Point, second: Point):
         """Returns the squared distance between two points.
-
         Comparing squared distances avoids floating point imprecision. In
         practice, for the small distances we are dealing with, there should be
         no imprecision with regular square roots if floating point operations
         are implemented in accordance with the IEEE 754 standard.
-
         >>> Point.distance_sq(Point(0, 0), Point(3, 4))
         25
         """
@@ -39,17 +37,13 @@ class Point:
     def distance_obj(self: Point, second: Point):
         """Returns a Distance object that represents the distance between the
         two given points.
-
         Internally, the Distance object stores the squared distance between two
         points. When a Distance object is compared with a number, we square the
         number. Comparing squared distances avoids floating point imprecision.
-
         This method may be more convenient than distance_sq as there is no need
         to manually square the other operand of comparison as the Distance
         object squares it for you.
-
         There may be bugs in the Distance implementation. Use at your own risk.
-
         >>> Point.distance_obj(Point(0, 0), Point(3, 4)) == 5
         True
         >>> Point.distance_obj(Point(0, 0), Point(2, 3)) < 5
@@ -61,7 +55,6 @@ class Point:
 
     def replace(self, *, x: Optional[int] = None, y: Optional[int] = None) -> Point:
         """Constructs a new Point with the parameters passed replaced.
-
         >>> point = Point(1, 2)
         >>> point.replace(y=3)
         Point(x=1, y=3)
@@ -80,6 +73,18 @@ class Point:
         assert len(points) == 2
         x_s, y_s = points
         return Point(x=int(x_s), y=int(y_s))
+    
+    def parse_to_np(line: str):
+        points = line.split()
+        assert len(points) == 2
+        x_s, y_s = points
+        return [x_s, y_s]
+
+    def parse_to_tu(line: str):
+        points = line.split()
+        assert len(points) == 2
+        x_s, y_s = points
+        return (x_s, y_s)
 
     def serialize(self, out):
         print(self.x, self.y, file=out)
