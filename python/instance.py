@@ -22,6 +22,7 @@ class Instance:
     coverage_radius: int
     penalty_radius: int
     cities: List[Point]
+    cities_list: List[List[int, int]]
 
     @property
     def N(self):
@@ -61,7 +62,11 @@ class Instance:
         coverage_radius = _next_int(lines_iter)
         penalty_radius = _next_int(lines_iter)
 
-        cities = [Point.parse(line) for line in lines_iter]
+        cities, cities_list = [], []
+        for line in lines_iter: 
+            
+            cities.append(Point.parse(line))
+            cities_list.append(Point.parse_to_np(line))
         assert num_cities == len(cities)
 
         instance = Instance(
@@ -69,6 +74,7 @@ class Instance:
             coverage_radius=coverage_radius,
             penalty_radius=penalty_radius,
             cities=cities,
+            cities_list=cities_list
         )
         assert instance.valid()
         return instance

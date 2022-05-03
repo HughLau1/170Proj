@@ -4,6 +4,7 @@ Modify this file to implement your own solvers.
 
 For usage, run `python3 solve.py --help`.
 """
+from sklearn.cluster import KMeans
 
 import argparse
 from pathlib import Path
@@ -21,10 +22,17 @@ def solve_naive(instance: Instance) -> Solution:
         towers=instance.cities,
     )
 
-
+def kmeans_solver(instance: Instance) -> Solution:
+    print(instance.cities)
+    print(instance.cities_list)
+    return Solution(
+        instance=instance,
+        towers=instance.cities
+    )
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
-    "naive": solve_naive
+    "naive": solve_naive,
+    "kmeans": kmeans_solver
 }
 
 
