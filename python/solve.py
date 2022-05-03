@@ -22,20 +22,30 @@ def solve_naive(instance: Instance) -> Solution:
         towers=instance.cities,
     )
 
-def kmeans_solver(instance: Instance) -> Solution:
+def kmeans(instance: Instance) -> Solution:
     data = np.array(instance.cities_list)
-    print(instance.cities)
-    kmeans = KMeans(12, init='k-means++', n_init=20).fit(data)
-    towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
-
-    return Solution(
+    i = len(instance.cities)
+    while True:
+        kmeans = KMeans(i, init='k-means++', n_init=20).fit(data)
+        towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
+        s = Solution(
         instance=instance,
         towers=towers
+        )
+        if s.valid():
+            ans = towers
+            i =  i - 1
+        else: break
+    # kmeans = KMeans(120, init='k-means++', n_init=20).fit(data)
+    # towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
+    return Solution(
+        instance=instance,
+        towers=ans
     )
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive,
-    "kmeans": kmeans_solver
+    "kmeans": kmeans
 }
 
 
