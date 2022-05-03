@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 from typing import Callable, Dict
 
-from sklearn.cluster import KMeans
+#from sklearn.cluster import KMeans
 from point import Point
 from instance import Instance
 from solution import Solution
@@ -22,7 +22,7 @@ from collections import namedtuple
 from itertools import product
 from math import sqrt
 from pprint import pprint as pp
-import numpy as np
+#import numpy as np
 
 def solve_naive(instance: Instance) -> Solution:
     return Solution(
@@ -60,12 +60,12 @@ def circles_from_p1p2r(p1, p2, r):
     # distance along the mirror line
     d = sqrt(r**2-(q/2)**2)
     # One answer
-    c1 = Cir(x = x3 - d*dy/q,
-             y = y3 + d*dx/q,
+    c1 = Cir(x = int(x3 - d*dy/q),
+             y = int(y3 + d*dx/q),
              r = abs(r))
     # The other answer
-    c2 = Cir(x = x3 + d*dy/q,
-             y = y3 - d*dx/q,
+    c2 = Cir(x = int(x3 + d*dy/q),
+             y = int(y3 - d*dx/q),
              r = abs(r))
     return c1, c2
 
