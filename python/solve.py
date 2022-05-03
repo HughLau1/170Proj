@@ -5,16 +5,16 @@ Modify this file to implement your own solvers.
 For usage, run `python3 solve.py --help`.
 """
 from sklearn.cluster import KMeans
+import numpy as np
 
 import argparse
 from pathlib import Path
 import sys
 from typing import Callable, Dict
-
+from point import Point
 from instance import Instance
 from solution import Solution
 from file_wrappers import StdinFileWrapper, StdoutFileWrapper
-
 
 def solve_naive(instance: Instance) -> Solution:
     return Solution(
@@ -23,11 +23,14 @@ def solve_naive(instance: Instance) -> Solution:
     )
 
 def kmeans_solver(instance: Instance) -> Solution:
+    data = np.array(instance.cities_list)
     print(instance.cities)
-    print(instance.cities_list)
+    kmeans = KMeans(12, init='k-means++', n_init=20).fit(data)
+    towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
+
     return Solution(
         instance=instance,
-        towers=instance.cities
+        towers=towers
     )
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
