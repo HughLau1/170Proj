@@ -4,6 +4,8 @@ Modify this file to implement your own solvers.
 
 For usage, run `python3 solve.py --help`.
 """
+from sklearn.cluster import KMeans
+import numpy as np
 
 import argparse
 from pathlib import Path
@@ -14,18 +16,22 @@ from instance import Instance
 from solution import Solution
 from file_wrappers import StdinFileWrapper, StdoutFileWrapper
 
+<<<<<<< HEAD
 from collections import namedtuple
 from itertools import product
 from math import sqrt
 from pprint import pprint as pp
 
 
+=======
+>>>>>>> 0163a1331932d3939ee079cb7bcbdbb06d1e11d0
 def solve_naive(instance: Instance) -> Solution:
     return Solution(
         instance=instance,
         towers=instance.cities,
     )
 
+<<<<<<< HEAD
 
 Pt = namedtuple('Pt', 'x, y')
 Cir = namedtuple('Cir', 'x, y, r')
@@ -161,6 +167,32 @@ def method(instance: Instance) -> Solution:
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive,
     "x": method
+=======
+def kmeans(instance: Instance) -> Solution:
+    data = np.array(instance.cities_list)
+    i = len(instance.cities)
+    while True:
+        kmeans = KMeans(i, init='k-means++', n_init=20).fit(data)
+        towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
+        s = Solution(
+        instance=instance,
+        towers=towers
+        )
+        if s.valid():
+            ans = towers
+            i =  i - 1
+        else: break
+    # kmeans = KMeans(120, init='k-means++', n_init=20).fit(data)
+    # towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
+    return Solution(
+        instance=instance,
+        towers=ans
+    )
+
+SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
+    "naive": solve_naive,
+    "kmeans": kmeans
+>>>>>>> 0163a1331932d3939ee079cb7bcbdbb06d1e11d0
 }
 
 

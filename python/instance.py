@@ -23,7 +23,10 @@ class Instance:
     penalty_radius: int
     cities: List[Point]
     cities_list: List[List[int, int]]
+<<<<<<< HEAD
     cities_tuples: List[(int, int)]
+=======
+>>>>>>> 0163a1331932d3939ee079cb7bcbdbb06d1e11d0
 
     @property
     def N(self):
@@ -62,11 +65,19 @@ class Instance:
         coverage_radius = _next_int(lines_iter)
         penalty_radius = _next_int(lines_iter)
 
+<<<<<<< HEAD
         cities, cities_list, cities_tuples = [], [], []
         for line in lines_iter: 
             cities.append(Point.parse(line))
             cities_list.append(Point.parse_to_np(line))
             cities_tuples.append(Point.parse_to_tu(line))
+=======
+        cities, cities_list = [], []
+        for line in lines_iter: 
+            
+            cities.append(Point.parse(line))
+            cities_list.append(Point.parse_to_np(line))
+>>>>>>> 0163a1331932d3939ee079cb7bcbdbb06d1e11d0
         assert num_cities == len(cities)
 
         instance = Instance(
@@ -74,8 +85,12 @@ class Instance:
             coverage_radius=coverage_radius,
             penalty_radius=penalty_radius,
             cities=cities,
+<<<<<<< HEAD
             cities_list=cities_list,
             cities_tuples=cities_tuples
+=======
+            cities_list=cities_list
+>>>>>>> 0163a1331932d3939ee079cb7bcbdbb06d1e11d0
         )
         assert instance.valid()
         return instance

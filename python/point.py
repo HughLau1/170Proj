@@ -5,6 +5,7 @@ from typing import Optional, TypeVar
 
 from distance import Distance
 import parse
+import numpy as np
 
 T = TypeVar("T")
 
@@ -79,12 +80,15 @@ class Point:
         assert len(points) == 2
         x_s, y_s = points
         return [x_s, y_s]
+<<<<<<< HEAD
 
     def parse_to_tu(line: str):
         points = line.split()
         assert len(points) == 2
         x_s, y_s = points
         return (x_s, y_s)
+=======
+>>>>>>> 0163a1331932d3939ee079cb7bcbdbb06d1e11d0
 
     def serialize(self, out):
         print(self.x, self.y, file=out)
