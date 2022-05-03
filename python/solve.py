@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 from typing import Callable, Dict
 
-#from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans
 from point import Point
 from instance import Instance
 from solution import Solution
@@ -22,7 +22,7 @@ from collections import namedtuple
 from itertools import product
 from math import sqrt
 from pprint import pprint as pp
-#import numpy as np
+import numpy as np
 
 def solve_naive(instance: Instance) -> Solution:
     return Solution(
@@ -120,15 +120,15 @@ def method(instance: Instance) -> Solution:
 
 def kmeans(instance: Instance) -> Solution:
     data = np.array(instance.cities_list)
-    print(instance.cities)
-    print(instance.cities_list)
-    kmeans = KMeans(12, init='k-means++', n_init=20).fit(data)
-    towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
 
-    return Solution(
-        instance=instance,
-        towers=towers
-    )
+    for i in range(1, len(data)):
+        
+        kmeans = KMeans(i, init='k-means++', n_init=20).fit(data)
+        towers = [Point(int(center[0]), int(center[1])) for center in kmeans.cluster_centers_]
+        s = Solution(instance=instance, towers=towers)
+        if s.valid():
+            break
+    return s
     
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive,
