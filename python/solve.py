@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 from typing import Callable, Dict
 
-from sklearn.cluster import KMeans
+#from sklearn.cluster import KMeans
 from point import Point
 from instance import Instance
 from solution import Solution
@@ -22,7 +22,7 @@ from collections import namedtuple
 from itertools import product
 from math import sqrt
 from pprint import pprint as pp
-import numpy as np
+#import numpy as np
 
 def solve_naive(instance: Instance) -> Solution:
     return Solution(
@@ -30,13 +30,29 @@ def solve_naive(instance: Instance) -> Solution:
         towers=instance.cities,
     )
 
+class PointObj:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-Pt = namedtuple('Pt', 'x, y')
-Cir = namedtuple('Cir', 'x, y, r')
+    def __iter__(self):
+        return (self.x, self.y)
+
+class CircleObj:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __iter__(self):
+        return (self.x, self.y)
+
+#Pt = namedtuple('Pt', 'x, y')
+#Cir = namedtuple('Cir', 'x, y, r')
 
 def circles_from_p1p2r(p1, p2, r):
-    (x1, y1), (x2, y2) = p1, p2
-    x1, x2, y1, y2 = int(x1), int(x2), int(y1), int(y2)
+    #(x1, y1), (x2, y2) = p1, p2
+    x1, x2, y1, y2 = int(p1.x), int(p2.x), int(p1.y), int(p2.y)
+    #int(x1), int(x2), int(y1), int(y2)
     if p1 == p2:
         #raise ValueError('coincident points gives infinite number of Circles')
         return None, None
@@ -47,13 +63,15 @@ def circles_from_p1p2r(p1, p2, r):
     if q > 2.0*r:
         #raise ValueError('separation of points > diameter')
         # One answer
-        c1 = Cir(x = x1,
-                y = y1,
-                r = abs(r))
+        c1 = CircleObj(x1, y1)
+        #c1 = Cir(x = x1,
+        #        y = y1,
+        #        r = abs(r))
         # The other answer
-        c2 = Cir(x = x2,
-                y = y2,
-                r = abs(r))
+        c2 = CircleObj(x2, y2)
+        #c2 = Cir(x = x2,
+        #        y = y2,
+        #        r = abs(r))
         return c1, c2
     # halfway point
     x3, y3 = (x1+x2)/2, (y1+y2)/2
@@ -62,47 +80,57 @@ def circles_from_p1p2r(p1, p2, r):
     # One answer
     x = x3 - d*dy/q
     y = y3 + d*dx/q
-    c1 = Cir(x = int(x),
-            y = int(y),
-            r = abs(r))
+    c1 = CircleObj(x1, y1)
+    #c1 = Cir(x = int(x),
+    #        y = int(y),
+    #        r = abs(r))
     # The other answer
     x = x3 + d*dy/q
     y = y3 - d*dx/q
-    c2 = Cir(x = int(x),
-            y = int(y),
-            r = abs(r))
+    c2 = CircleObj(x2, y2)
+    #c2 = Cir(x = int(x),
+    #        y = int(y),
+    #        r = abs(r))
 
     if c1.x < c2.x:
-        x1 = int(c1.x) + 1
-        x2 = int(c2.x)
+        c1.x = int(c1.x) + 1
+        c2.x = int(c2.x)
+        #x1 = int(c1.x) + 1
+        #x2 = int(c2.x)
     elif c1.x > c2.x:
-        x1 = int(c1.x)
-        x2 = int(c2.x) + 1
+        c1.x = int(c1.x)
+        c2.x = int(c2.x) + 1
+        #x1 = int(c1.x)
+        #x2 = int(c2.x) + 1
     else:
         pass
     if c1.y < c2.y:
-        y1 = int(c1.y) + 1
-        y2 = int(c2.y)
+        c1.y = int(c1.y) + 1
+        c2.y = int(c2.y)
+        #y1 = int(c1.y) + 1
+        #y2 = int(c2.y)
     elif c1.y > c2.y:
-        y1 = int(c1.y)
-        y2 = int(c2.y) + 1
+        c1.y = int(c1.y)
+        c2.y = int(c2.y) + 1
+        #y1 = int(c1.y)
+        #y2 = int(c2.y) + 1
     else:
         pass
-    c1 = Cir(x = int(x1),
-            y = int(y1),
-            r = abs(r))
-    c2 = Cir(x = int(x2),
-            y = int(y2),
-            r = abs(r))
+    #c1 = Cir(x = int(x1),
+    #        y = int(y1),
+    #        r = abs(r))
+    #c2 = Cir(x = int(x2),
+    #        y = int(y2),
+    #        r = abs(r))
     return c1, c2
 
 def covers(c, pt):
-    return (c.x - int(pt[0]))**2 + (c.y - int(pt[1]))**2 <= c.r**2
+    return (c.x - int(pt.x))**2 + (c.y - int(pt.y))**2 <= 9
    
 
 def method(instance: Instance) -> Solution:
 
-    r, points = 3, [Pt(*i) for i in instance.cities_tuples]
+    r, points = 3, [PointObj(*i) for i in instance.cities_tuples]
     n, p = len(points), points  
     # All circles between two points (which can both be the same point)
     circles = set(sum([[c1, c2]
@@ -122,7 +150,7 @@ def method(instance: Instance) -> Solution:
             cj, coverj = items[j]
             if not coverj - coveri:
                 coverage[cj] = {}
-    pp('coverage after')
+    #pp('coverage after')
     coverage = {key: val for key, val in coverage.items() if val}
     #print('Reduced to %i circles for consideration' % len(coverage))
     # pp(coverage)
@@ -134,14 +162,14 @@ def method(instance: Instance) -> Solution:
         delta = nxt_cov - covered
         covered |= nxt_cov
         chosen.append([nxt_circle, delta])
-    # pp(chosen)
+    #pp(chosen)
     towers = [Point(circ[0].x, circ[0].y) for circ in chosen]
     # Output
     #print('\n%i points' % n)
     #pp(points)
     #print('A minimum of circles of radius %g to cover the points (And the extra points they covered)' % r)
     #pp(chosen)
-    # pp(towers)
+    pp(towers)
 
     return Solution(
         instance=instance,
