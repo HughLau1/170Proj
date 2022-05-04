@@ -60,13 +60,40 @@ def circles_from_p1p2r(p1, p2, r):
     # distance along the mirror line
     d = sqrt(r**2-(q/2)**2)
     # One answer
-    c1 = Cir(x = int(x3 - d*dy/q),
-             y = int(y3 + d*dx/q),
-             r = abs(r))
+    x = x3 - d*dy/q
+    y = y3 + d*dx/q
+    c1 = Cir(x = int(x),
+            y = int(y),
+            r = abs(r))
     # The other answer
-    c2 = Cir(x = int(x3 + d*dy/q),
-             y = int(y3 - d*dx/q),
-             r = abs(r))
+    x = x3 + d*dy/q
+    y = y3 - d*dx/q
+    c2 = Cir(x = int(x),
+            y = int(y),
+            r = abs(r))
+
+    if c1.x < c2.x:
+        x1 = int(c1.x) + 1
+        x2 = int(c2.x)
+    elif c1.x > c2.x:
+        x1 = int(c1.x)
+        x2 = int(c2.x) + 1
+    else:
+        pass
+    if c1.y < c2.y:
+        y1 = int(c1.y) + 1
+        y2 = int(c2.y)
+    elif c1.y > c2.y:
+        y1 = int(c1.y)
+        y2 = int(c2.y) + 1
+    else:
+        pass
+    c1 = Cir(x = int(x1),
+            y = int(y1),
+            r = abs(r))
+    c2 = Cir(x = int(x2),
+            y = int(y2),
+            r = abs(r))
     return c1, c2
 
 def covers(c, pt):
@@ -81,9 +108,12 @@ def method(instance: Instance) -> Solution:
     circles = set(sum([[c1, c2]
                         for c1, c2 in [circles_from_p1p2r(p1, p2, r) for p1, p2 in product(p, p)]
                         if c1 is not None], []))
+    # pp(circles)
     # points covered by each circle 
     coverage = {c: {pt for pt in points if covers(c, pt)}
                 for c in circles}
+    # pp('coverage before')
+    # pp(coverage)
     # Ignore all but one of circles covering points covered in whole by other circles
     #print('\nwas considering %i circles' % len(coverage))
     items = sorted(coverage.items(), key=lambda keyval:len(keyval[1]))
@@ -92,9 +122,10 @@ def method(instance: Instance) -> Solution:
             cj, coverj = items[j]
             if not coverj - coveri:
                 coverage[cj] = {}
+    pp('coverage after')
     coverage = {key: val for key, val in coverage.items() if val}
     #print('Reduced to %i circles for consideration' % len(coverage))
-
+    # pp(coverage)
     # Greedy coverage choice
     chosen, covered = [], set()
     while len(covered) < n:
@@ -103,14 +134,14 @@ def method(instance: Instance) -> Solution:
         delta = nxt_cov - covered
         covered |= nxt_cov
         chosen.append([nxt_circle, delta])
-
+    # pp(chosen)
     towers = [Point(circ[0].x, circ[0].y) for circ in chosen]
     # Output
     #print('\n%i points' % n)
     #pp(points)
     #print('A minimum of circles of radius %g to cover the points (And the extra points they covered)' % r)
     #pp(chosen)
-    pp(towers)
+    # pp(towers)
 
     return Solution(
         instance=instance,
