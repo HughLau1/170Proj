@@ -69,12 +69,10 @@ def generate_circles(p1, p2, boundary):
     dy = y2 - y1
     q = sqrt(dx**2 + dy**2)
     
-    if q > 2 * 3:
+    if q > 6:
         return [CircleObj(x1, y1), CircleObj(x2, y2)]
     
-
     x3, y3 = (x1+x2)/2, (y1+y2)/2
-
     d = sqrt(3**2-(q/2)**2)
 
     newx1 = x3 - d*dy/q
@@ -83,11 +81,9 @@ def generate_circles(p1, p2, boundary):
     newx2 = x3 + d*dy/q
     newy2 = y3 - d*dx/q
 
-
     if newx1 < newx2:
         newx1 = int(newx1) + 1
         newx2 = int(newx2)
-
     elif newx1 > newx2:
         newx1 = int(newx1)
         newx2 = int(newx2) + 1
@@ -97,11 +93,9 @@ def generate_circles(p1, p2, boundary):
     if newy1 < newy2:
         newy1 = int(newy1) + 1
         newy2 = int(newy2)
-
     elif newy1 > newy2:
         newy1 = int(newy1)
         newy2 = int(newy2) + 1
-
     else:
         pass
     
@@ -122,32 +116,25 @@ def greedy(instance: Instance) -> Solution:
 
     points = [PointObj(x,y) for x,y in instance.cities_list]
     n = len(points)
-    print("n len = " + str(n))
 
     circles = allCircles(points, instance.grid_side_length)
-    print("num of circles generated= " + str(len(circles)))
-    # pp(circles)
     
-    x = {c: {pt for pt in points if covers(c, pt)}
-                for c in circles}
+    circletopointsmap = {c: {pt for pt in points if covers(c, pt)} for c in circles}
 
-    print("coverage len = " + str(len(x)))
-
-    coverage_sorted_by_len = sorted(x.items(), key=lambda k: len(k[1]), reverse=True)
+    coverage_sorted_by_len = sorted(circletopointsmap.items(), key=lambda k: len(k[1]), reverse=True)
     
     for i in range(len(coverage_sorted_by_len)):
         _, coveri = coverage_sorted_by_len[i]
         for j in range(i+1, len(coverage_sorted_by_len)):
             circj, coverj = coverage_sorted_by_len[j]
-            if not coverj - coveri:
-                x[circj] = {}
-    x = {key: val for key, val in x.items() if val}
-    print("coverage len after removing= " + str(len(x)))
+            if coverj - coveri == {}:
+                circletopointsmap[circj] = {}
+    circletopointsmap = {key: val for key, val in circletopointsmap.items() if val}
     
     selected_circles = []
     covered_pts = set()
     while len(covered_pts) < n:
-        _, circ, pts = max((len(pts - covered_pts), circ, pts) for circ, pts in x.items())
+        _, circ, pts = max((len(pts - covered_pts), circ, pts) for circ, pts in circletopointsmap.items())
         pts_not_already_covered = pts - covered_pts
         covered_pts.update(pts_not_already_covered)
         selected_circles.append(circ)
