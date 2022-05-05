@@ -50,7 +50,7 @@ class CircleObj:
             return ', '.join((str(self.x),str(self.y)))
         
     def __gt__ (self, other):
-        # if self.x**2 + self.y**2 > other.x**2 + other.y**2:
+        # if self.x**2 + self.y**2 < other.x**2 + other.y**2:
         if self.x>other.x:
             return True
         else:
@@ -61,23 +61,23 @@ class CircleObj:
     def __hash__(self):
         return hash((self.x, self.y))
 
-def circles_from_p1p2r(p1, p2, r):
+def circles_from_p1p2r(p1, p2, boundary):
     x1, y1 = p1.x, p1.y
     x2, y2 = p2.x, p2.y
     if x1 == x2 and y1 == y2:
-        return None, None
+        return 
     
     dx = x2 - x1
     dy = y2 - y1
     q = sqrt(dx**2 + dy**2)
     
-    if q > 2.0*r:
-        return CircleObj(x1, y1), CircleObj(x2, y2)
+    if q > 2.0*3:
+        return [CircleObj(x1, y1), CircleObj(x2, y2)]
     
 
     x3, y3 = (x1+x2)/2, (y1+y2)/2
 
-    d = sqrt(r**2-(q/2)**2)
+    d = sqrt(3**2-(q/2)**2)
 
     newx1 = x3 - d*dy/q
     newy1 = y3 + d*dx/q
@@ -106,25 +106,25 @@ def circles_from_p1p2r(p1, p2, r):
 
     else:
         pass
-    return CircleObj(newx1, newy1), CircleObj(newx2, newy2)
-
+    
+    if 0 <= newx1 < boundary and 0 <= newx2 < boundary and 0 <= newy1 < boundary and 0 <= newy2 < boundary:
+        return [CircleObj(newx1, newy1), CircleObj(newx2, newy2)]
+    else: return 
 def covers(c, pt):
     return (c.x - int(pt.x))**2 + (c.y - int(pt.y))**2 <= 9
    
 
 def method(instance: Instance) -> Solution:
 
-    r = 3
     points = [PointObj(x,y) for x,y in instance.cities_list]
     n = len(points)
     print("n len = " + str(n))
 
-    circles = set(sum([[c1, c2]
-                        for c1, c2 in [circles_from_p1p2r(p1, p2, r) for p1, p2 in product(points, points)]
-                        if c1 is not None], []))
-    
+    circles = sum([x for x in [circles_from_p1p2r(p1, p2, instance.grid_side_length) for p1, p2 in product(points, points)] if x], [])
+    circles = set(circles)
     print("num of circles generated= " + str(len(circles)))
     # pp(circles)
+    
     coverage = {c: {pt for pt in points if covers(c, pt)}
                 for c in circles}
 
@@ -146,10 +146,9 @@ def method(instance: Instance) -> Solution:
         pts_not_already_covered = pts - covered
         covered |= pts
         chosen.append([circ, pts_not_already_covered])
-    # pp(chosen) 
+        
     towers = [Point(circ.x, circ.y) for circ, _ in chosen]
     print([pt.y for pt in towers])    
-    # pp(towers)
 
     return Solution(
         instance=instance,
