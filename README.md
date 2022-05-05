@@ -1,3 +1,5 @@
+To use code, simply run solve_all.py.
+
 # Spring 2022 CS170 Project Skeleton
 
 ## Requirements
