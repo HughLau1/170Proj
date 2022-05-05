@@ -135,24 +135,24 @@ def greedy(instance: Instance) -> Solution:
 
     coverage_sorted_by_len = sorted(x.items(), key=lambda k: len(k[1]), reverse=True)
     
-    for i, (ci, coveri) in enumerate(coverage_sorted_by_len):
+    for i in range(len(coverage_sorted_by_len)):
+        _, coveri = coverage_sorted_by_len[i]
         for j in range(i+1, len(coverage_sorted_by_len)):
-            cj, coverj = coverage_sorted_by_len[j]
+            circj, coverj = coverage_sorted_by_len[j]
             if not coverj - coveri:
-                x[cj] = {}
+                x[circj] = {}
     x = {key: val for key, val in x.items() if val}
     print("coverage len after removing= " + str(len(x)))
     
-    selectedCircles = []
-    covered = set()
-    while len(covered) < n:
-        _, circ, pts = max((len(pts - covered), circ, pts) for circ, pts in x.items())
-        pts_not_already_covered = pts - covered
-        covered |= pts
-        selectedCircles.append([circ, pts_not_already_covered])
+    selected_circles = []
+    covered_pts = set()
+    while len(covered_pts) < n:
+        _, circ, pts = max((len(pts - covered_pts), circ, pts) for circ, pts in x.items())
+        pts_not_already_covered = pts - covered_pts
+        covered_pts.update(pts_not_already_covered)
+        selected_circles.append(circ)
         
-    towers = [Point(circ.x, circ.y) for circ, _ in selectedCircles]
-    print([pt.y for pt in towers])    
+    towers = [Point(circ.x, circ.y) for circ in selected_circles]
 
     return Solution(
         instance=instance,
