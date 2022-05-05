@@ -50,7 +50,7 @@ class CircleObj:
             return ', '.join((str(self.x),str(self.y)))
         
     def __gt__ (self, other):
-        # if self.x**2 + self.y**2 < other.x**2 + other.y**2:
+        # if self.x**2 + self.y**2 > other.x**2 + other.y**2:
         if self.x>other.x:
             return True
         else:
@@ -132,11 +132,12 @@ def method(instance: Instance) -> Solution:
 
     coverage_sorted_by_len = sorted(coverage.items(), key = lambda keyvalpair:len(keyvalpair[1]))
     
-    for i, (ci, coveri) in enumerate(coverage_sorted_by_len):
+    for i in range(len(coverage_sorted_by_len)):
+        _, coveri = coverage_sorted_by_len[i]
         for j in range(i+1, len(coverage_sorted_by_len)):
-            cj, coverj = coverage_sorted_by_len[j]
+            circj, coverj = coverage_sorted_by_len[j]
             if not coverj - coveri:
-                coverage[cj] = {}
+                coverage[circj] = {}
     coverage = {key: val for key, val in coverage.items() if val}
     print("coverage len after removing= " + str(len(coverage)))
     
@@ -144,11 +145,10 @@ def method(instance: Instance) -> Solution:
     while len(covered) < n:
         _, circ, pts = max((len(pts - covered), circ, pts) for circ, pts in coverage.items())
         pts_not_already_covered = pts - covered
-        covered |= pts
-        chosen.append([circ, pts_not_already_covered])
+        covered.update(pts_not_already_covered)
+        chosen.append(circ)
         
-    towers = [Point(circ.x, circ.y) for circ, _ in chosen]
-    print([pt.y for pt in towers])    
+    towers = [Point(circ.x, circ.y) for circ in chosen]
 
     return Solution(
         instance=instance,
