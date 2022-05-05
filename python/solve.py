@@ -122,16 +122,16 @@ def greedy(instance: Instance) -> Solution:
 
     points = [PointObj(x,y) for x,y in instance.cities_list]
     n = len(points)
-    print("n len = " + str(n))
+    #print("n len = " + str(n))
 
     circles = allCircles(points, instance.grid_side_length)
-    print("num of circles generated= " + str(len(circles)))
+    #print("num of circles generated= " + str(len(circles)))
     # pp(circles)
     
     x = {c: {pt for pt in points if covers(c, pt)}
                 for c in circles}
 
-    print("coverage len = " + str(len(x)))
+    #print("coverage len = " + str(len(x)))
 
     coverage_sorted_by_len = sorted(x.items(), key=lambda k: len(k[1]), reverse=True)
     
@@ -142,7 +142,7 @@ def greedy(instance: Instance) -> Solution:
             if not coverj - coveri:
                 x[circj] = {}
     x = {key: val for key, val in x.items() if val}
-    print("coverage len after removing= " + str(len(x)))
+    #print("coverage len after removing= " + str(len(x)))
     
     selected_circles = []
     covered_pts = set()
