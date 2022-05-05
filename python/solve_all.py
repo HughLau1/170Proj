@@ -20,7 +20,8 @@ from solution import Solution
 # Modify this line to import your own solvers.
 # YOUR CODE HERE
 from solve import solve_naive
-from solve import kmeans
+#from solve import kmeans
+from solve import greedy
 
 class Size(enum.Enum):
     SMALL = "small"
@@ -32,11 +33,11 @@ def solver(size: Size, instance: Instance) -> Solution:
     # Modify this function to use your imported solvers.
     # YOUR CODE HERE
     if size == Size.SMALL:
-        return kmeans(instance)
+        return greedy(instance)
     elif size == Size.MEDIUM:
-        return kmeans(instance)
+        return greedy(instance)
     elif size == Size.LARGE:
-        return kmeans(instance)
+        return greedy(instance)
 
 
 # You shouldn't need to modify anything below this line.

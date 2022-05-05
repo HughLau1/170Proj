@@ -1,16 +1,18 @@
 """Solves an instance.
-
 Modify this file to implement your own solvers.
-
 For usage, run `python3 solve.py --help`.
 """
 #from sklearn.cluster import KMeans
 #import numpy as np
 
 import argparse
+import collections
 from pathlib import Path
 import sys
 from typing import Callable, Dict
+#import numpy as np
+
+#from sklearn.cluster import KMeans
 
 #from sklearn.cluster import KMeans
 from point import Point
@@ -32,11 +34,10 @@ def solve_naive(instance: Instance) -> Solution:
 
 class PointObj:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __iter__(self):
-        return (self.x, self.y)
+        self.x = int(x)
+        self.y = int(y)
+    def __repr__(self):
+            return ', '.join((str(self.x),str(self.y)))
 
 class CircleObj:
     def __init__(self, x, y):
@@ -47,8 +48,8 @@ class CircleObj:
             return ', '.join((str(self.x),str(self.y)))
         
     def __gt__ (self, other):
-        # if self.x**2 + self.y**2 < other.x**2 + other.y**2:
-        if self.x>other.x:
+        if self.x**2 + self.y**2 < other.x**2 + other.y**2:
+        #if self.x > other.x:
             return True
         else:
             return False
@@ -58,7 +59,7 @@ class CircleObj:
     def __hash__(self):
         return hash((self.x, self.y))
 
-def circles_from_p1p2r(p1, p2, boundary):
+def generate_circles(p1, p2, boundary):
     x1, y1 = p1.x, p1.y
     x2, y2 = p2.x, p2.y
     if x1 == x2 and y1 == y2:
@@ -68,7 +69,7 @@ def circles_from_p1p2r(p1, p2, boundary):
     dy = y2 - y1
     q = sqrt(dx**2 + dy**2)
     
-    if q > 2.0*3:
+    if q > 2 * 3:
         return [CircleObj(x1, y1), CircleObj(x2, y2)]
     
 
@@ -76,78 +77,81 @@ def circles_from_p1p2r(p1, p2, boundary):
 
     d = sqrt(3**2-(q/2)**2)
 
-    if c1.x < c2.x:
-        c1.x = int(c1.x) + 1
-        c2.x = int(c2.x)
-        #x1 = int(c1.x) + 1
-        #x2 = int(c2.x)
-    elif c1.x > c2.x:
-        c1.x = int(c1.x)
-        c2.x = int(c2.x) + 1
-        #x1 = int(c1.x)
-        #x2 = int(c2.x) + 1
+    newx1 = x3 - d*dy/q
+    newy1 = y3 + d*dx/q
+
+    newx2 = x3 + d*dy/q
+    newy2 = y3 - d*dx/q
+
+
+    if newx1 < newx2:
+        newx1 = int(newx1) + 1
+        newx2 = int(newx2)
+
+    elif newx1 > newx2:
+        newx1 = int(newx1)
+        newx2 = int(newx2) + 1
     else:
         pass
-    if c1.y < c2.y:
-        c1.y = int(c1.y) + 1
-        c2.y = int(c2.y)
-        #y1 = int(c1.y) + 1
-        #y2 = int(c2.y)
-    elif c1.y > c2.y:
-        c1.y = int(c1.y)
-        c2.y = int(c2.y) + 1
-        #y1 = int(c1.y)
-        #y2 = int(c2.y) + 1
+    
+    if newy1 < newy2:
+        newy1 = int(newy1) + 1
+        newy2 = int(newy2)
+
+    elif newy1 > newy2:
+        newy1 = int(newy1)
+        newy2 = int(newy2) + 1
+
     else:
         pass
-    #c1 = Cir(x = int(x1),
-    #        y = int(y1),
-    #        r = abs(r))
-    #c2 = Cir(x = int(x2),
-    #        y = int(y2),
-    #        r = abs(r))
-    return c1, c2
+    
+    if 0 <= newx1 < boundary and 0 <= newx2 < boundary and 0 <= newy1 < boundary and 0 <= newy2 < boundary:
+        return [CircleObj(newx1, newy1), CircleObj(newx2, newy2)]
+    else: return 
 
 def covers(c, pt):
     return (c.x - int(pt.x))**2 + (c.y - int(pt.y))**2 <= 9
-   
 
-def method(instance: Instance) -> Solution:
+def allCircles(points, boundary):
+    all_pairs = product(points, points)
+    generated_circles = [generate_circles(p1, p2, boundary) for p1, p2 in all_pairs]
+    summation = sum([x for x in generated_circles if x], [])
+    return set(summation)
+
+def greedy(instance: Instance) -> Solution:
 
     points = [PointObj(x,y) for x,y in instance.cities_list]
     n = len(points)
     print("n len = " + str(n))
 
-    circles = sum([x for x in [circles_from_p1p2r(p1, p2, instance.grid_side_length) for p1, p2 in product(points, points)] if x], [])
-    circles = set(circles)
+    circles = allCircles(points, instance.grid_side_length)
     print("num of circles generated= " + str(len(circles)))
     # pp(circles)
     
-    coverage = {c: {pt for pt in points if covers(c, pt)}
+    x = {c: {pt for pt in points if covers(c, pt)}
                 for c in circles}
-    # pp('coverage before')
-    # pp(coverage)
-    # Ignore all but one of circles covering points covered in whole by other circles
-    #print('\nwas considering %i circles' % len(coverage))
-    items = sorted(coverage.items(), key=lambda keyval:len(keyval[1]))
-    for i, (ci, coveri) in enumerate(items):
-        for j in range(i+1, len(items)):
-            cj, coverj = items[j]
+
+    print("coverage len = " + str(len(x)))
+
+    coverage_sorted_by_len = sorted(x.items(), key=lambda k: len(k[1]), reverse=True)
+    
+    for i, (ci, coveri) in enumerate(coverage_sorted_by_len):
+        for j in range(i+1, len(coverage_sorted_by_len)):
+            cj, coverj = coverage_sorted_by_len[j]
             if not coverj - coveri:
-                coverage[cj] = {}
-    #pp('coverage after')
-    coverage = {key: val for key, val in coverage.items() if val}
-    #print('Reduced to %i circles for consideration' % len(coverage))
-    # pp(coverage)
-    # Greedy coverage choice
-    chosen, covered = [], set()
+                x[cj] = {}
+    x = {key: val for key, val in x.items() if val}
+    print("coverage len after removing= " + str(len(x)))
+    
+    selectedCircles = []
+    covered = set()
     while len(covered) < n:
-        _, circ, pts = max((len(pts - covered), circ, pts) for circ, pts in coverage.items())
+        _, circ, pts = max((len(pts - covered), circ, pts) for circ, pts in x.items())
         pts_not_already_covered = pts - covered
         covered |= pts
-        chosen.append([circ, pts_not_already_covered])
+        selectedCircles.append([circ, pts_not_already_covered])
         
-    towers = [Point(circ.x, circ.y) for circ, _ in chosen]
+    towers = [Point(circ.x, circ.y) for circ, _ in selectedCircles]
     print([pt.y for pt in towers])    
 
     return Solution(
@@ -155,7 +159,7 @@ def method(instance: Instance) -> Solution:
         towers=towers
     )
 
-
+'''
 def kmeans(instance: Instance) -> Solution:
     data = np.array(instance.cities_list)
 
@@ -167,11 +171,12 @@ def kmeans(instance: Instance) -> Solution:
         if s.valid():
             break
     return s
+'''
     
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive,
-    "kmeans": kmeans, 
-    "x": method
+    #"kmeans": kmeans, 
+    "greedy": greedy
 }
 
 
