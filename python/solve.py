@@ -8,13 +8,9 @@ For usage, run `python3 solve.py --help`.
 #import numpy as np
 
 import argparse
-import collections
 from pathlib import Path
 import sys
 from typing import Callable, Dict
-import numpy as np
-
-from sklearn.cluster import KMeans
 
 #from sklearn.cluster import KMeans
 from point import Point
@@ -36,77 +32,97 @@ def solve_naive(instance: Instance) -> Solution:
 
 class PointObj:
     def __init__(self, x, y):
-        self.x = int(x)
-        self.y = int(y)
-    def __repr__(self):
-            return ', '.join((str(self.x),str(self.y)))
+        self.x = x
+        self.y = y
+
+    def __iter__(self):
+        return (self.x, self.y)
 
 class CircleObj:
     def __init__(self, x, y):
-        self.x = int(x)
-        self.y = int(y)
-        
-    def __repr__(self):
-            return ', '.join((str(self.x),str(self.y)))
-        
-    def __gt__ (self, other):
-        # if self.x**2 + self.y**2 > other.x**2 + other.y**2:
-        if self.x>other.x:
-            return True
-        else:
-            return False
-        
-    def __eq__ (self, other):
-        return self.x == other.x and self.y == other.y
-    def __hash__(self):
-        return hash((self.x, self.y))
+        self.x = x
+        self.y = y
+
+    def __iter__(self):
+        return (self.x, self.y)
+
+#Pt = namedtuple('Pt', 'x, y')
+#Cir = namedtuple('Cir', 'x, y, r')
 
 def circles_from_p1p2r(p1, p2, r):
-    x1, y1 = p1.x, p1.y
-    x2, y2 = p2.x, p2.y
-    if x1 == x2 and y1 == y2:
+    #(x1, y1), (x2, y2) = p1, p2
+    x1, x2, y1, y2 = int(p1.x), int(p2.x), int(p1.y), int(p2.y)
+    #int(x1), int(x2), int(y1), int(y2)
+    if p1 == p2:
+        #raise ValueError('coincident points gives infinite number of Circles')
         return None, None
-    
-    dx = x2 - x1
-    dy = y2 - y1
+    # delta x, delta y between points
+    dx, dy = x2 - x1, y2 - y1
+    # dist between points
     q = sqrt(dx**2 + dy**2)
-    
     if q > 2.0*r:
-        return CircleObj(x1, y1), CircleObj(x2, y2)
-    
-
+        #raise ValueError('separation of points > diameter')
+        # One answer
+        c1 = CircleObj(x1, y1)
+        #c1 = Cir(x = x1,
+        #        y = y1,
+        #        r = abs(r))
+        # The other answer
+        c2 = CircleObj(x2, y2)
+        #c2 = Cir(x = x2,
+        #        y = y2,
+        #        r = abs(r))
+        return c1, c2
+    # halfway point
     x3, y3 = (x1+x2)/2, (y1+y2)/2
-
+    # distance along the mirror line
     d = sqrt(r**2-(q/2)**2)
+    # One answer
+    x = x3 - d*dy/q
+    y = y3 + d*dx/q
+    c1 = CircleObj(x1, y1)
+    #c1 = Cir(x = int(x),
+    #        y = int(y),
+    #        r = abs(r))
+    # The other answer
+    x = x3 + d*dy/q
+    y = y3 - d*dx/q
+    c2 = CircleObj(x2, y2)
+    #c2 = Cir(x = int(x),
+    #        y = int(y),
+    #        r = abs(r))
 
-    newx1 = x3 - d*dy/q
-    newy1 = y3 + d*dx/q
-
-    newx2 = x3 + d*dy/q
-    newy2 = y3 - d*dx/q
-
-
-    if newx1 < newx2:
-        newx1 = int(newx1) + 1
-        newx2 = int(newx2)
-
-    elif newx1 > newx2:
-        newx1 = int(newx1)
-        newx2 = int(newx2) + 1
+    if c1.x < c2.x:
+        c1.x = int(c1.x) + 1
+        c2.x = int(c2.x)
+        #x1 = int(c1.x) + 1
+        #x2 = int(c2.x)
+    elif c1.x > c2.x:
+        c1.x = int(c1.x)
+        c2.x = int(c2.x) + 1
+        #x1 = int(c1.x)
+        #x2 = int(c2.x) + 1
     else:
         pass
-    
-    if newy1 < newy2:
-        newy1 = int(newy1) + 1
-        newy2 = int(newy2)
-
-    elif newy1 > newy2:
-        newy1 = int(newy1)
-        newy2 = int(newy2) + 1
-
+    if c1.y < c2.y:
+        c1.y = int(c1.y) + 1
+        c2.y = int(c2.y)
+        #y1 = int(c1.y) + 1
+        #y2 = int(c2.y)
+    elif c1.y > c2.y:
+        c1.y = int(c1.y)
+        c2.y = int(c2.y) + 1
+        #y1 = int(c1.y)
+        #y2 = int(c2.y) + 1
     else:
         pass
-    return CircleObj(newx1, newy1), CircleObj(newx2, newy2)
+    #c1 = Cir(x = int(x1),
+    #        y = int(y1),
+    #        r = abs(r))
+    #c2 = Cir(x = int(x2),
+    #        y = int(y2),
+    #        r = abs(r))
+    return c1, c2
 
 def covers(c, pt):
     return (c.x - int(pt.x))**2 + (c.y - int(pt.y))**2 <= 9
@@ -114,42 +130,46 @@ def covers(c, pt):
 
 def method(instance: Instance) -> Solution:
 
-    r = 3
-    points = [PointObj(x,y) for x,y in instance.cities_list]
-    n = len(points)
-    print("n len = " + str(n))
-
+    r, points = 3, [PointObj(*i) for i in instance.cities_tuples]
+    n, p = len(points), points  
+    # All circles between two points (which can both be the same point)
     circles = set(sum([[c1, c2]
-                        for c1, c2 in [circles_from_p1p2r(p1, p2, r) for p1, p2 in product(points, points)]
+                        for c1, c2 in [circles_from_p1p2r(p1, p2, r) for p1, p2 in product(p, p)]
                         if c1 is not None], []))
-    
-    print("num of circles generated= " + str(len(circles)))
     # pp(circles)
+    # points covered by each circle 
     coverage = {c: {pt for pt in points if covers(c, pt)}
                 for c in circles}
-
-    print("coverage len = " + str(len(coverage)))
-
-    coverage_sorted_by_len = sorted(coverage.items(), key = lambda keyvalpair:len(keyvalpair[1]))
-    
-    for i, (ci, coveri) in enumerate(coverage_sorted_by_len):
-        for j in range(i+1, len(coverage_sorted_by_len)):
-            cj, coverj = coverage_sorted_by_len[j]
+    # pp('coverage before')
+    # pp(coverage)
+    # Ignore all but one of circles covering points covered in whole by other circles
+    #print('\nwas considering %i circles' % len(coverage))
+    items = sorted(coverage.items(), key=lambda keyval:len(keyval[1]))
+    for i, (ci, coveri) in enumerate(items):
+        for j in range(i+1, len(items)):
+            cj, coverj = items[j]
             if not coverj - coveri:
                 coverage[cj] = {}
+    #pp('coverage after')
     coverage = {key: val for key, val in coverage.items() if val}
-    print("coverage len after removing= " + str(len(coverage)))
-    
+    #print('Reduced to %i circles for consideration' % len(coverage))
+    # pp(coverage)
+    # Greedy coverage choice
     chosen, covered = [], set()
     while len(covered) < n:
-        _, circ, pts = max((len(pts - covered), circ, pts) for circ, pts in coverage.items())
-        pts_not_already_covered = pts - covered
-        covered |= pts
-        chosen.append([circ, pts_not_already_covered])
-    # pp(chosen) 
-    towers = [Point(circ.x, circ.y) for circ, _ in chosen]
-    print([pt.y for pt in towers])    
-    # pp(towers)
+        _, nxt_circle, nxt_cov = max((len(pts - covered), c, pts)
+                                        for c, pts in coverage.items())
+        delta = nxt_cov - covered
+        covered |= nxt_cov
+        chosen.append([nxt_circle, delta])
+    #pp(chosen)
+    towers = [Point(circ[0].x, circ[0].y) for circ in chosen]
+    # Output
+    #print('\n%i points' % n)
+    #pp(points)
+    #print('A minimum of circles of radius %g to cover the points (And the extra points they covered)' % r)
+    #pp(chosen)
+    pp(towers)
 
     return Solution(
         instance=instance,
